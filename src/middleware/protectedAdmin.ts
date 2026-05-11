@@ -4,7 +4,7 @@ import { prisma } from "../config/db";
 export const protectAdminAccount = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { id } = req.params;
 
@@ -21,11 +21,11 @@ export const protectAdminAccount = async (
     return res.status(404).json({ message: "User not found" });
   }
 
-  if (req.user!.role === "ADMIN" && targetUser.role === "ADMIN") {
-    return res.status(403).json({
-      message: "Forbidden: Admin accounts cannot be modified",
-    });
-  }
+  // if (req.user!.role === "ADMIN" && targetUser.role === "ADMIN") {
+  //   return res.status(403).json({
+  //     message: "Forbidden: Admin accounts cannot be modified",
+  //   });
+  // }
 
   next();
 };

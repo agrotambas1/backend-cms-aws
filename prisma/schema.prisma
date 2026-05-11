@@ -26,8 +26,6 @@ model User {
   deletedAt DateTime? @map("deleted_at")
 
   media     Media[]
-  // bannersCreated Banner[] @relation("BannerCreator")
-  // bannersUpdated Banner[] @relation("BannerUpdater")
 
   createdArticles Article[]  @relation("ArticleCreator")
   updatedArticles Article[]  @relation("ArticleUpdater")
@@ -85,38 +83,6 @@ model Media {
   @@index([deletedAt, mimeType, createdAt])
   @@map("media")
 }
-
-// model Banner {
-//   id          String    @id @default(uuid()) @db.Uuid
-//   title       String
-//   description String
-//   imageId     String    @map("image_id") @db.Uuid
-//   image       Media     @relation(fields: [imageId], references: [id])
-
-//   linkImage   String?   @map("link_image")
-//   order       Int       @default(0)
-//   status      String    @default("draft")
-
-//   startDate   DateTime? @map("start_date")
-//   endDate     DateTime? @map("end_date")
-
-//   createdBy   String    @map("created_by") @db.Uuid
-//   creator     User      @relation("BannerCreator", fields: [createdBy], references: [id])
-
-//   updatedBy   String    @map("updated_by") @db.Uuid
-//   updater     User      @relation("BannerUpdater", fields: [updatedBy], references: [id])
-
-//   createdAt   DateTime  @default(now()) @map("created_at")
-//   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
-//   deletedAt   DateTime? @map("deleted_at")
-
-//   @@index([status, startDate, endDate])
-//   @@index([deletedAt, status, order])
-//   @@index([status, deletedAt])
-//   @@index([order, deletedAt])
-//   @@index([startDate, endDate, status, deletedAt])
-//   @@map("banner")
-// }
 
 model Service {
   id          String    @id @default(uuid()) @db.Uuid

@@ -84,14 +84,27 @@ export const registerUser = async (req: Request, res: Response) => {
     const { name, username, email, password, role } = req.body;
 
     // check if user already exists
-    const userExists = await prisma.user.findFirst({
-      where: {
-        OR: [{ username }, { email }],
-      },
-    });
+    // const userExists = await prisma.user.findFirst({
+    //   where: {
+    //     OR: [{ username }, { email }],
+    //   },
+    // });
 
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+    // if (userExists) {
+    //   return res.status(400).json({ message: "User already exists" });
+    // }
+
+    const [usernameExists, emailExists] = await Promise.all([
+      prisma.user.findFirst({ where: { username, deletedAt: null } }),
+      prisma.user.findFirst({ where: { email, deletedAt: null } }),
+    ]);
+
+    if (usernameExists) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+
+    if (emailExists) {
+      return res.status(400).json({ message: "Email already exists" });
     }
 
     //   Hash password
@@ -156,24 +169,43 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 
     // Check if username or email is already taken by another user
-    if (username || email) {
-      const duplicateUser = await prisma.user.findFirst({
-        where: {
-          AND: [
-            { id: { not: id } },
-            {
-              OR: [username ? { username } : {}, email ? { email } : {}].filter(
-                (obj) => Object.keys(obj).length > 0,
-              ),
-            },
-          ],
-        },
+    // if (username || email) {
+    //   const duplicateUser = await prisma.user.findFirst({
+    //     where: {
+    //       AND: [
+    //         { id: { not: id } },
+    //         {
+    //           OR: [username ? { username } : {}, email ? { email } : {}].filter(
+    //             (obj) => Object.keys(obj).length > 0,
+    //           ),
+    //         },
+    //       ],
+    //     },
+    //   });
+
+    //   if (duplicateUser) {
+    //     return res.status(400).json({
+    //       message: "Username or email already taken by another user",
+    //     });
+    //   }
+    // }
+
+    if (username) {
+      const duplicateUsername = await prisma.user.findFirst({
+        where: { username, id: { not: id }, deletedAt: null },
       });
 
-      if (duplicateUser) {
-        return res.status(400).json({
-          message: "Username or email already taken by another user",
-        });
+      if (duplicateUsername) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+    }
+
+    if (email) {
+      const duplicateEmail = await prisma.user.findFirst({
+        where: { email, id: { not: id }, deletedAt: null },
+      });
+      if (duplicateEmail) {
+        return res.status(400).json({ message: "Email already taken" });
       }
     }
 
