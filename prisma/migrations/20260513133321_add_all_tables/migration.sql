@@ -125,33 +125,6 @@ CREATE TABLE "pivot_article_tags" (
 );
 
 -- CreateTable
-CREATE TABLE "events" (
-    "id" UUID NOT NULL,
-    "event_name" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
-    "excerpt" TEXT,
-    "description" TEXT NOT NULL,
-    "service_id" UUID,
-    "industry_id" UUID,
-    "thumbnail_id" UUID,
-    "event_type" TEXT NOT NULL,
-    "event_date" TIMESTAMP(3) NOT NULL,
-    "location" TEXT,
-    "location_type" TEXT NOT NULL,
-    "meetingUrl" TEXT,
-    "registration_url" TEXT,
-    "quota" INTEGER,
-    "status" TEXT NOT NULL,
-    "created_by" UUID NOT NULL,
-    "updated_by" UUID,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-    "deleted_at" TIMESTAMP(3),
-
-    CONSTRAINT "events_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "case_studies" (
     "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
@@ -260,30 +233,6 @@ CREATE UNIQUE INDEX "articles_slug_deleted_at_key" ON "articles"("slug", "delete
 CREATE INDEX "pivot_article_tags_tag_id_idx" ON "pivot_article_tags"("tag_id");
 
 -- CreateIndex
-CREATE INDEX "events_status_deleted_at_idx" ON "events"("status", "deleted_at");
-
--- CreateIndex
-CREATE INDEX "events_event_date_deleted_at_idx" ON "events"("event_date", "deleted_at");
-
--- CreateIndex
-CREATE INDEX "events_event_date_status_deleted_at_idx" ON "events"("event_date", "status", "deleted_at");
-
--- CreateIndex
-CREATE INDEX "events_location_type_deleted_at_idx" ON "events"("location_type", "deleted_at");
-
--- CreateIndex
-CREATE INDEX "events_status_event_date_deleted_at_idx" ON "events"("status", "event_date", "deleted_at");
-
--- CreateIndex
-CREATE INDEX "events_event_type_deleted_at_idx" ON "events"("event_type", "deleted_at");
-
--- CreateIndex
-CREATE INDEX "events_created_at_idx" ON "events"("created_at" DESC);
-
--- CreateIndex
-CREATE UNIQUE INDEX "events_slug_deleted_at_key" ON "events"("slug", "deleted_at");
-
--- CreateIndex
 CREATE INDEX "case_studies_status_deleted_at_idx" ON "case_studies"("status", "deleted_at");
 
 -- CreateIndex
@@ -333,21 +282,6 @@ ALTER TABLE "pivot_article_tags" ADD CONSTRAINT "pivot_article_tags_article_id_f
 
 -- AddForeignKey
 ALTER TABLE "pivot_article_tags" ADD CONSTRAINT "pivot_article_tags_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "article_tags"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_thumbnail_id_fkey" FOREIGN KEY ("thumbnail_id") REFERENCES "media"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_service_id_fkey" FOREIGN KEY ("service_id") REFERENCES "services"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_industry_id_fkey" FOREIGN KEY ("industry_id") REFERENCES "industries"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "case_studies" ADD CONSTRAINT "case_studies_thumbnail_id_fkey" FOREIGN KEY ("thumbnail_id") REFERENCES "media"("id") ON DELETE SET NULL ON UPDATE CASCADE;

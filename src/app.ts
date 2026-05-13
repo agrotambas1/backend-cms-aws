@@ -13,12 +13,12 @@ import industries from "./routes/cms/industries/industry";
 import articleCategories from "./routes/cms/articles/categories";
 import articleTags from "./routes/cms/articles/tags";
 import article from "./routes/cms/articles/articles";
-import event from "./routes/cms/events/events";
+// import event from "./routes/cms/events/events";
 import caseStudies from "./routes/cms/caseStudies/caseStudies";
 import articleCategoriesPublic from "./routes/public/article/categoryPublic";
 import articleTagsPublic from "./routes/public/article/tagPublic";
 import articlePublic from "./routes/public/article/articlePublic";
-import eventPublic from "./routes/public/event/event";
+// import eventPublic from "./routes/public/event/event";
 import caseStudiesPublic from "./routes/public/caseStudies/caseStudyPublic";
 
 import fileMedia from "./routes/file/file";
@@ -91,7 +91,7 @@ app.use("/api/cms", cmsCors, industries);
 app.use("/api/cms", cmsCors, articleCategories);
 app.use("/api/cms", cmsCors, articleTags);
 app.use("/api/cms", cmsCors, article);
-app.use("/api/cms", cmsCors, event);
+// app.use("/api/cms", cmsCors, event);
 app.use("/api/cms", cmsCors, caseStudies);
 
 // Public
@@ -102,7 +102,7 @@ app.use("/api/public", (req, res, next) => {
 app.use("/api/public", publicCors, articleCategoriesPublic);
 app.use("/api/public", publicCors, articleTagsPublic);
 app.use("/api/public", publicCors, articlePublic);
-app.use("/api/public", publicCors, eventPublic);
+// app.use("/api/public", publicCors, eventPublic);
 app.use("/api/public", publicCors, caseStudiesPublic);
 
 // File
