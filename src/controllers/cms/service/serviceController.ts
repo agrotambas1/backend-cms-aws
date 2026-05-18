@@ -284,7 +284,6 @@ export const deleteService = async (req: Request, res: Response) => {
         _count: {
           select: {
             caseStudies: true,
-            events: true,
             articles: true,
           },
         },
@@ -302,7 +301,6 @@ export const deleteService = async (req: Request, res: Response) => {
         message: `Cannot delete service. It is being used in ${totalUsage} content item(s)`,
         usage: {
           caseStudies: service._count.caseStudies,
-          events: service._count.events,
           articles: service._count.articles,
         },
       });

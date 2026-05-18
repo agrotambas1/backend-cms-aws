@@ -146,36 +146,6 @@ const updateCategory = async (req, res) => {
     }
 };
 exports.updateCategory = updateCategory;
-// export const deleteCategory = async (req: Request, res: Response) => {
-//   try {
-//     if (!req.user?.id) {
-//       return res.status(401).json({ message: "Unauthorized" });
-//     }
-//     const { id } = req.params;
-//     if (!id) {
-//       return res.status(400).json({ message: "Category ID is required" });
-//     }
-//     const category = await prisma.articleCategory.findUnique({
-//       where: { id },
-//     });
-//     if (!category) {
-//       return res.status(404).json({ message: "Category not found" });
-//     }
-//     await prisma.articleCategory.update({
-//       where: { id },
-//       data: {
-//         deletedAt: new Date(),
-//       },
-//     });
-//     res.status(200).json({
-//       status: "success",
-//       message: "Category deleted successfully",
-//     });
-//   } catch (error) {
-//     console.error("Error deleting category:", error);
-//     res.status(500).json({ message: "Failed to delete category" });
-//   }
-// };
 const deleteCategory = async (req, res) => {
     try {
         if (!req.user?.id) {

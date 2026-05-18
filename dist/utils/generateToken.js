@@ -18,9 +18,10 @@ const generateToken = (userId, res) => {
     // Set token in HTTP-only cookie
     res.cookie("token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production" ? true : false,
+        // secure: process.env.NODE_ENV === "production" ? true : false,
+        secure: process.env.NODE_ENV === "production",
         // sameSite: "strict",
-        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 24 * 60 * 60 * 1000,
     });
     return token;

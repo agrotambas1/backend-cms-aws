@@ -235,7 +235,6 @@ const deleteIndustry = async (req, res) => {
                 _count: {
                     select: {
                         caseStudies: true,
-                        events: true,
                         articles: true,
                     },
                 },
@@ -244,15 +243,12 @@ const deleteIndustry = async (req, res) => {
         if (!industry) {
             return res.status(404).json({ message: "Industry not found" });
         }
-        const totalUsage = industry._count.caseStudies +
-            industry._count.events +
-            industry._count.articles;
+        const totalUsage = industry._count.caseStudies + industry._count.articles;
         if (totalUsage > 0) {
             return res.status(409).json({
                 message: `Cannot delete industry. It is being used in ${totalUsage} content item(s).`,
                 usage: {
                     caseStudies: industry._count.caseStudies,
-                    events: industry._count.events,
                     articles: industry._count.articles,
                 },
             });

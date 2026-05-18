@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import { prisma } from "../../../config/db";
+import { s3 } from "../../../config/s3";
+import { DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import fs from "fs";
 import {
   buildCMSMediaPaginationParams,
@@ -8,6 +11,7 @@ import {
 } from "../../../utils/queryBuilder/cms/media/media";
 import path from "path";
 import multer from "multer";
+import { Readable } from "stream";
 
 export const getMedia = async (req: Request, res: Response) => {
   try {
@@ -105,25 +109,46 @@ export const uploadMedia = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const file = req.file;
+    // const file = req.file;
+    // const { title, description, alt_text, caption } = req.body;
+
+    // const pathParts = file.path.split(path.sep);
+    // const module = pathParts[1];
+    // const year = pathParts[2];
+    // const month = pathParts[3];
+
+    const file = req.file as any;
     const { title, description, alt_text, caption } = req.body;
 
-    const pathParts = file.path.split(path.sep);
-    const module = pathParts[1];
-    const year = pathParts[2];
-    const month = pathParts[3];
+    const s3Key: string = file.s3Key;
+    const s3Url: string = file.s3Url;
+
+    // const media = await prisma.media.create({
+    //   data: {
+    //     title,
+    //     description,
+    //     fileName: file.filename,
+    //     filePath: file.path,
+    //     mimeType: file.mimetype,
+    //     fileSize: file.size,
+    //     url: `/uploads/${module}/${year}/${month}/${file.filename}`,
+    //     altText: alt_text,
+    //     caption: caption,
+    //     createdBy: req.user.id,
+    //   },
+    // });
 
     const media = await prisma.media.create({
       data: {
         title,
         description,
-        fileName: file.filename,
-        filePath: file.path,
+        fileName: file.originalname,
+        filePath: s3Key,
         mimeType: file.mimetype,
         fileSize: file.size,
-        url: `/uploads/${module}/${year}/${month}/${file.filename}`,
+        url: s3Url,
         altText: alt_text,
-        caption: caption,
+        caption,
         createdBy: req.user.id,
       },
     });
@@ -203,18 +228,15 @@ export const updateMedia = async (req: Request, res: Response) => {
 };
 
 const checkMediaUsage = async (mediaId: string) => {
-  const [articleThumb, eventThumb, caseStudyThumb] = await Promise.all([
+  const [articleThumb, caseStudyThumb] = await Promise.all([
     prisma.article.count({ where: { thumbnailId: mediaId } }),
-    prisma.event.count({ where: { thumbnailId: mediaId } }),
     prisma.caseStudy.count({ where: { thumbnailId: mediaId } }),
   ]);
 
   return {
     articleThumb,
-    eventThumb,
     caseStudyThumb,
-
-    total: articleThumb + eventThumb + caseStudyThumb,
+    total: articleThumb + caseStudyThumb,
   };
 };
 
@@ -262,13 +284,20 @@ export const deleteMedia = async (req: Request, res: Response) => {
       where: { id },
     });
 
-    try {
-      if (fs.existsSync(mediaExists.filePath)) {
-        fs.unlinkSync(mediaExists.filePath);
-      }
-    } catch (fileError) {
-      console.error("Error deleting file:", fileError);
-    }
+    // try {
+    //   if (fs.existsSync(mediaExists.filePath)) {
+    //     fs.unlinkSync(mediaExists.filePath);
+    //   }
+    // } catch (fileError) {
+    //   console.error("Error deleting file:", fileError);
+    // }
+
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: mediaExists.filePath,
+      }),
+    );
 
     res.json({
       status: "success",
@@ -325,15 +354,26 @@ export const bulkDeleteMedia = async (req: Request, res: Response) => {
       },
     });
 
-    for (const media of deletable) {
-      try {
-        if (media.filePath && fs.existsSync(media.filePath)) {
-          fs.unlinkSync(media.filePath);
-        }
-      } catch (err) {
-        console.warn("File delete failed:", media.filePath);
-      }
-    }
+    // for (const media of deletable) {
+    //   try {
+    //     if (media.filePath && fs.existsSync(media.filePath)) {
+    //       fs.unlinkSync(media.filePath);
+    //     }
+    //   } catch (err) {
+    //     console.warn("File delete failed:", media.filePath);
+    //   }
+    // }
+
+    await Promise.all(
+      deletable.map((m) =>
+        s3.send(
+          new DeleteObjectCommand({
+            Bucket: process.env.AWS_BUCKET_NAME!,
+            Key: m.filePath,
+          }),
+        ),
+      ),
+    );
 
     return res.json({
       status: "success",
@@ -364,25 +404,37 @@ export const downloadMedia = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Media not found" });
     }
 
-    if (!fs.existsSync(media.filePath)) {
-      return res.status(404).json({ message: "File not found on server" });
-    }
+    // if (!fs.existsSync(media.filePath)) {
+    //   return res.status(404).json({ message: "File not found on server" });
+    // }
 
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${media.fileName}"`,
+    // res.setHeader(
+    //   "Content-Disposition",
+    //   `attachment; filename="${media.fileName}"`,
+    // );
+    // res.setHeader("Content-Type", media.mimeType);
+    // res.setHeader("Content-Length", media.fileSize.toString());
+
+    // res.download(media.filePath, media.fileName, (err) => {
+    //   if (err) {
+    //     console.error("Download error:", err);
+    //     if (!res.headersSent) {
+    //       res.status(500).json({ message: "Failed to download file" });
+    //     }
+    //   }
+    // });
+
+    const url = await getSignedUrl(
+      s3,
+      new GetObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: media.filePath,
+        ResponseContentDisposition: `attachment; filename="${media.fileName}"`,
+      }),
+      { expiresIn: 300 },
     );
-    res.setHeader("Content-Type", media.mimeType);
-    res.setHeader("Content-Length", media.fileSize.toString());
 
-    res.download(media.filePath, media.fileName, (err) => {
-      if (err) {
-        console.error("Download error:", err);
-        if (!res.headersSent) {
-          res.status(500).json({ message: "Failed to download file" });
-        }
-      }
-    });
+    res.json({ url });
   } catch (error) {
     console.error("Download media error:", error);
     res.status(500).json({ message: "Failed to download media" });

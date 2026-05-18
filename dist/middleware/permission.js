@@ -13,8 +13,6 @@ const checkRole = (...allowedRoles) => {
         if (!(0, exports.hasRole)(req.user.role, allowedRoles)) {
             return res.status(403).json({
                 message: "Forbidden: You don't have permission to access this resource",
-                // requiredRoles: allowedRoles,
-                // yourRole: req.user.role,
             });
         }
         next();

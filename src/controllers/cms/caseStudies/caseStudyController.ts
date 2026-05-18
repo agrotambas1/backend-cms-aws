@@ -742,6 +742,8 @@ export const updateCaseStudy = async (req: Request, res: Response) => {
       thumbnailId: selectedThumbnailId,
       publicationId: selectedPublicationId,
       updatedBy: req.user.id,
+      serviceId: serviceId ?? existingCaseStudy.serviceId,
+      industryId: industryId ?? existingCaseStudy.industryId,
     };
 
     const caseStudy = await prisma.caseStudy.update({

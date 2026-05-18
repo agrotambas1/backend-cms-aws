@@ -16,12 +16,12 @@ const industry_1 = __importDefault(require("./routes/cms/industries/industry"));
 const categories_1 = __importDefault(require("./routes/cms/articles/categories"));
 const tags_1 = __importDefault(require("./routes/cms/articles/tags"));
 const articles_1 = __importDefault(require("./routes/cms/articles/articles"));
-const events_1 = __importDefault(require("./routes/cms/events/events"));
+// import event from "./routes/cms/events/events";
 const caseStudies_1 = __importDefault(require("./routes/cms/caseStudies/caseStudies"));
 const categoryPublic_1 = __importDefault(require("./routes/public/article/categoryPublic"));
 const tagPublic_1 = __importDefault(require("./routes/public/article/tagPublic"));
 const articlePublic_1 = __importDefault(require("./routes/public/article/articlePublic"));
-const event_1 = __importDefault(require("./routes/public/event/event"));
+// import eventPublic from "./routes/public/event/event";
 const caseStudyPublic_1 = __importDefault(require("./routes/public/caseStudies/caseStudyPublic"));
 const file_1 = __importDefault(require("./routes/file/file"));
 const scheduler_1 = require("./services/scheduler");
@@ -35,14 +35,15 @@ const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
 // CORS
 const cmsOrigins = [
-    process.env.CMS_FRONTEND_URL || "http://localhost:3005",
+    process.env.CMS_FRONTEND_URL,
     process.env.CMS_FRONTEND_PROD_URL,
     `http://localhost:${PORT}`,
-    ,
+    // `http://192.168.1.4:3000`,
 ].filter(Boolean);
 const publicOrigins = [
     process.env.PUBLIC_FRONTEND_URL || "http://localhost:3002",
     process.env.PUBLIC_FRONTEND_PROD_URL,
+    process.env.PUBLIC_FRONTEND_URL_PREVIEW_PROD,
 ].filter(Boolean);
 const cmsCors = (0, cors_1.default)({
     origin(origin, callback) {
@@ -80,13 +81,17 @@ app.use("/api/cms", cmsCors, industry_1.default);
 app.use("/api/cms", cmsCors, categories_1.default);
 app.use("/api/cms", cmsCors, tags_1.default);
 app.use("/api/cms", cmsCors, articles_1.default);
-app.use("/api/cms", cmsCors, events_1.default);
+// app.use("/api/cms", cmsCors, event);
 app.use("/api/cms", cmsCors, caseStudies_1.default);
 // Public
+app.use("/api/public", (req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+});
 app.use("/api/public", publicCors, categoryPublic_1.default);
 app.use("/api/public", publicCors, tagPublic_1.default);
 app.use("/api/public", publicCors, articlePublic_1.default);
-app.use("/api/public", publicCors, event_1.default);
+// app.use("/api/public", publicCors, eventPublic);
 app.use("/api/public", publicCors, caseStudyPublic_1.default);
 // File
 app.use("/uploads", file_1.default);

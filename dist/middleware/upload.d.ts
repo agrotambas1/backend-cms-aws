@@ -1,7 +1,7 @@
-import multer from "multer";
-export declare const createUploadMiddleware: (module: string) => multer.Multer;
-export declare const uploadInsight: multer.Multer;
-export declare const uploadEvent: multer.Multer;
-export declare const uploadPortfolio: multer.Multer;
-export declare const uploadMedia: multer.Multer;
+import { Request, Response, NextFunction } from "express";
+export declare const createUploadMiddleware: (module: string) => (import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | ((req: Request, res: Response, next: NextFunction) => Promise<void>))[];
+export declare const uploadInsight: (import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | ((req: Request, res: Response, next: NextFunction) => Promise<void>))[];
+export declare const uploadEvent: (import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | ((req: Request, res: Response, next: NextFunction) => Promise<void>))[];
+export declare const uploadPortfolio: (import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | ((req: Request, res: Response, next: NextFunction) => Promise<void>))[];
+export declare const uploadMedia: (import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | ((req: Request, res: Response, next: NextFunction) => Promise<void>))[];
 //# sourceMappingURL=upload.d.ts.map

@@ -5,9 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.downloadMedia = exports.bulkDeleteMedia = exports.deleteMedia = exports.updateMedia = exports.uploadMedia = exports.getMediaById = exports.getMedia = void 0;
 const db_1 = require("../../../config/db");
-const fs_1 = __importDefault(require("fs"));
+const s3_1 = require("../../../config/s3");
+const client_s3_1 = require("@aws-sdk/client-s3");
+const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const media_1 = require("../../../utils/queryBuilder/cms/media/media");
-const path_1 = __importDefault(require("path"));
 const multer_1 = __importDefault(require("multer"));
 const getMedia = async (req, res) => {
     try {
@@ -85,23 +86,41 @@ const uploadMedia = async (req, res) => {
         if (!req.user?.id) {
             return res.status(401).json({ message: "Unauthorized" });
         }
+        // const file = req.file;
+        // const { title, description, alt_text, caption } = req.body;
+        // const pathParts = file.path.split(path.sep);
+        // const module = pathParts[1];
+        // const year = pathParts[2];
+        // const month = pathParts[3];
         const file = req.file;
         const { title, description, alt_text, caption } = req.body;
-        const pathParts = file.path.split(path_1.default.sep);
-        const module = pathParts[1];
-        const year = pathParts[2];
-        const month = pathParts[3];
+        const s3Key = file.s3Key;
+        const s3Url = file.s3Url;
+        // const media = await prisma.media.create({
+        //   data: {
+        //     title,
+        //     description,
+        //     fileName: file.filename,
+        //     filePath: file.path,
+        //     mimeType: file.mimetype,
+        //     fileSize: file.size,
+        //     url: `/uploads/${module}/${year}/${month}/${file.filename}`,
+        //     altText: alt_text,
+        //     caption: caption,
+        //     createdBy: req.user.id,
+        //   },
+        // });
         const media = await db_1.prisma.media.create({
             data: {
                 title,
                 description,
-                fileName: file.filename,
-                filePath: file.path,
+                fileName: file.originalname,
+                filePath: s3Key,
                 mimeType: file.mimetype,
                 fileSize: file.size,
-                url: `/uploads/${module}/${year}/${month}/${file.filename}`,
+                url: s3Url,
                 altText: alt_text,
-                caption: caption,
+                caption,
                 createdBy: req.user.id,
             },
         });
@@ -172,16 +191,14 @@ const updateMedia = async (req, res) => {
 };
 exports.updateMedia = updateMedia;
 const checkMediaUsage = async (mediaId) => {
-    const [articleThumb, eventThumb, caseStudyThumb] = await Promise.all([
+    const [articleThumb, caseStudyThumb] = await Promise.all([
         db_1.prisma.article.count({ where: { thumbnailId: mediaId } }),
-        db_1.prisma.event.count({ where: { thumbnailId: mediaId } }),
         db_1.prisma.caseStudy.count({ where: { thumbnailId: mediaId } }),
     ]);
     return {
         articleThumb,
-        eventThumb,
         caseStudyThumb,
-        total: articleThumb + eventThumb + caseStudyThumb,
+        total: articleThumb + caseStudyThumb,
     };
 };
 const deleteMedia = async (req, res) => {
@@ -218,14 +235,17 @@ const deleteMedia = async (req, res) => {
         await db_1.prisma.media.delete({
             where: { id },
         });
-        try {
-            if (fs_1.default.existsSync(mediaExists.filePath)) {
-                fs_1.default.unlinkSync(mediaExists.filePath);
-            }
-        }
-        catch (fileError) {
-            console.error("Error deleting file:", fileError);
-        }
+        // try {
+        //   if (fs.existsSync(mediaExists.filePath)) {
+        //     fs.unlinkSync(mediaExists.filePath);
+        //   }
+        // } catch (fileError) {
+        //   console.error("Error deleting file:", fileError);
+        // }
+        await s3_1.s3.send(new client_s3_1.DeleteObjectCommand({
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: mediaExists.filePath,
+        }));
         res.json({
             status: "success",
             message: "Media deleted successfully",
@@ -274,16 +294,19 @@ const bulkDeleteMedia = async (req, res) => {
                 id: { in: deletable.map((m) => m.id) },
             },
         });
-        for (const media of deletable) {
-            try {
-                if (media.filePath && fs_1.default.existsSync(media.filePath)) {
-                    fs_1.default.unlinkSync(media.filePath);
-                }
-            }
-            catch (err) {
-                console.warn("File delete failed:", media.filePath);
-            }
-        }
+        // for (const media of deletable) {
+        //   try {
+        //     if (media.filePath && fs.existsSync(media.filePath)) {
+        //       fs.unlinkSync(media.filePath);
+        //     }
+        //   } catch (err) {
+        //     console.warn("File delete failed:", media.filePath);
+        //   }
+        // }
+        await Promise.all(deletable.map((m) => s3_1.s3.send(new client_s3_1.DeleteObjectCommand({
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: m.filePath,
+        }))));
         return res.json({
             status: "success",
             deleted: deletable.length,
@@ -310,20 +333,29 @@ const downloadMedia = async (req, res) => {
         if (!media) {
             return res.status(404).json({ message: "Media not found" });
         }
-        if (!fs_1.default.existsSync(media.filePath)) {
-            return res.status(404).json({ message: "File not found on server" });
-        }
-        res.setHeader("Content-Disposition", `attachment; filename="${media.fileName}"`);
-        res.setHeader("Content-Type", media.mimeType);
-        res.setHeader("Content-Length", media.fileSize.toString());
-        res.download(media.filePath, media.fileName, (err) => {
-            if (err) {
-                console.error("Download error:", err);
-                if (!res.headersSent) {
-                    res.status(500).json({ message: "Failed to download file" });
-                }
-            }
-        });
+        // if (!fs.existsSync(media.filePath)) {
+        //   return res.status(404).json({ message: "File not found on server" });
+        // }
+        // res.setHeader(
+        //   "Content-Disposition",
+        //   `attachment; filename="${media.fileName}"`,
+        // );
+        // res.setHeader("Content-Type", media.mimeType);
+        // res.setHeader("Content-Length", media.fileSize.toString());
+        // res.download(media.filePath, media.fileName, (err) => {
+        //   if (err) {
+        //     console.error("Download error:", err);
+        //     if (!res.headersSent) {
+        //       res.status(500).json({ message: "Failed to download file" });
+        //     }
+        //   }
+        // });
+        const url = await (0, s3_request_presigner_1.getSignedUrl)(s3_1.s3, new client_s3_1.GetObjectCommand({
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: media.filePath,
+            ResponseContentDisposition: `attachment; filename="${media.fileName}"`,
+        }), { expiresIn: 300 });
+        res.json({ url });
     }
     catch (error) {
         console.error("Download media error:", error);

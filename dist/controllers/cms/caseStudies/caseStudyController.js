@@ -600,6 +600,8 @@ const updateCaseStudy = async (req, res) => {
             thumbnailId: selectedThumbnailId,
             publicationId: selectedPublicationId,
             updatedBy: req.user.id,
+            serviceId: serviceId ?? existingCaseStudy.serviceId,
+            industryId: industryId ?? existingCaseStudy.industryId,
         };
         const caseStudy = await db_1.prisma.caseStudy.update({
             where: { id },

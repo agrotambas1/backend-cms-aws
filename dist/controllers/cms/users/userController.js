@@ -7,13 +7,6 @@ exports.deleteUser = exports.updateUser = exports.registerUser = exports.getUser
 const db_1 = require("../../../config/db");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const users_1 = require("../../../utils/queryBuilder/cms/users/users");
-// export const getUser = async (req: Request, res: Response) => {
-//   if (!req.user) {
-//     return res.status(401).json({ message: "Unauthorized" });
-//   }
-//   const users = await prisma.user.findMany();
-//   res.json(users);
-// };
 const getUser = async (req, res) => {
     try {
         if (!req.user) {
@@ -70,13 +63,23 @@ const registerUser = async (req, res) => {
         }
         const { name, username, email, password, role } = req.body;
         // check if user already exists
-        const userExists = await db_1.prisma.user.findFirst({
-            where: {
-                OR: [{ username }, { email }],
-            },
-        });
-        if (userExists) {
-            return res.status(400).json({ message: "User already exists" });
+        // const userExists = await prisma.user.findFirst({
+        //   where: {
+        //     OR: [{ username }, { email }],
+        //   },
+        // });
+        // if (userExists) {
+        //   return res.status(400).json({ message: "User already exists" });
+        // }
+        const [usernameExists, emailExists] = await Promise.all([
+            db_1.prisma.user.findFirst({ where: { username, deletedAt: null } }),
+            db_1.prisma.user.findFirst({ where: { email, deletedAt: null } }),
+        ]);
+        if (usernameExists) {
+            return res.status(400).json({ message: "Username already exists" });
+        }
+        if (emailExists) {
+            return res.status(400).json({ message: "Email already exists" });
         }
         //   Hash password
         const salt = await bcryptjs_1.default.genSalt(10);
@@ -130,21 +133,39 @@ const updateUser = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
         // Check if username or email is already taken by another user
-        if (username || email) {
-            const duplicateUser = await db_1.prisma.user.findFirst({
-                where: {
-                    AND: [
-                        { id: { not: id } },
-                        {
-                            OR: [username ? { username } : {}, email ? { email } : {}].filter((obj) => Object.keys(obj).length > 0),
-                        },
-                    ],
-                },
+        // if (username || email) {
+        //   const duplicateUser = await prisma.user.findFirst({
+        //     where: {
+        //       AND: [
+        //         { id: { not: id } },
+        //         {
+        //           OR: [username ? { username } : {}, email ? { email } : {}].filter(
+        //             (obj) => Object.keys(obj).length > 0,
+        //           ),
+        //         },
+        //       ],
+        //     },
+        //   });
+        //   if (duplicateUser) {
+        //     return res.status(400).json({
+        //       message: "Username or email already taken by another user",
+        //     });
+        //   }
+        // }
+        if (username) {
+            const duplicateUsername = await db_1.prisma.user.findFirst({
+                where: { username, id: { not: id }, deletedAt: null },
             });
-            if (duplicateUser) {
-                return res.status(400).json({
-                    message: "Username or email already taken by another user",
-                });
+            if (duplicateUsername) {
+                return res.status(400).json({ message: "Username already taken" });
+            }
+        }
+        if (email) {
+            const duplicateEmail = await db_1.prisma.user.findFirst({
+                where: { email, id: { not: id }, deletedAt: null },
+            });
+            if (duplicateEmail) {
+                return res.status(400).json({ message: "Email already taken" });
             }
         }
         // Prepare update data
