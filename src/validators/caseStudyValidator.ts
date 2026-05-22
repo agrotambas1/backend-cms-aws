@@ -184,12 +184,14 @@ const caseStudySchema = z.object({
   }),
   metaTitle: z
     .string()
-    .min(1, "Meta title cannot be empty")
-    .max(60, "Meta title is too long (max 60 characters for SEO)"),
+    .max(60, "Meta title is too long (max 60 characters for SEO)")
+    .optional()
+    .nullable(),
   metaDescription: z
     .string()
-    .min(1, "Meta description cannot be empty")
-    .max(160, "Meta description is too long (max 160 characters for SEO)"),
+    .max(160, "Meta description is too long (max 160 characters for SEO)")
+    .optional()
+    .nullable(),
   seoKeywords: z
     .array(z.string({ error: "SEO keywords must be an array" }))
     .max(10, "Maximum 10 SEO keywords allowed")
@@ -233,8 +235,8 @@ export const validateCaseStudyData = (
     if (!data.problem) errors.push("Problem is required");
     if (!data.solution) errors.push("Solution is required");
     if (!data.outcomes) errors.push("Outcomes is required");
-    if (!data.metaTitle) errors.push("Meta title is required");
-    if (!data.metaDescription) errors.push("Meta description is required");
+    // if (!data.metaTitle) errors.push("Meta title is required");
+    // if (!data.metaDescription) errors.push("Meta description is required");
     if (!data.status) errors.push("Status is required");
 
     if (errors.length > 0) return errors;

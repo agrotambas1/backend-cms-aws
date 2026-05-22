@@ -88,12 +88,14 @@ const articleSchema = zod_1.z.object({
     content: zod_1.z.string().min(1, "Content cannot be empty"),
     metaTitle: zod_1.z
         .string()
-        .min(1, "Meta title cannot be empty")
-        .max(60, "Meta title is too long (max 60 characters for SEO)"),
+        .max(60, "Meta title is too long (max 60 characters for SEO)")
+        .optional()
+        .nullable(),
     metaDescription: zod_1.z
         .string()
-        .min(1, "Meta description cannot be empty")
-        .max(160, "Meta description is too long (max 160 characters for SEO)"),
+        .max(160, "Meta description is too long (max 160 characters for SEO)")
+        .optional()
+        .nullable(),
     seoKeywords: zod_1.z
         .array(zod_1.z.string({ error: "SEO keywords must be an array" }))
         .max(10, "Maximum 10 SEO keywords allowed")
@@ -118,14 +120,11 @@ const validateArticleData = (data, isUpdate = false) => {
             errors.push("Excerpt is required");
         if (!data.content)
             errors.push("Content is required");
-        if (!data.metaTitle)
-            errors.push("Meta title is required");
-        if (!data.metaDescription)
-            errors.push("Meta description is required");
+        // if (!data.metaTitle) errors.push("Meta title is required");
+        // if (!data.metaDescription) errors.push("Meta description is required");
         if (!data.categoryId)
             errors.push("Category is required");
-        if (!data.tags || data.tags.length === 0)
-            errors.push("Tags are required");
+        // if (!data.tags || data.tags.length === 0) errors.push("Tags are required");
         if (!data.status)
             errors.push("Status is required");
         if (errors.length > 0)
