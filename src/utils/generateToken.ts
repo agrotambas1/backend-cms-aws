@@ -22,6 +22,8 @@ export const generateToken = (userId: string, res: Response): string => {
     secure: process.env.NODE_ENV === "production",
     // sameSite: "strict",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    domain: process.env.COOKIE_DOMAIN,
+    path: "/",
     maxAge: 24 * 60 * 60 * 1000,
   });
 
