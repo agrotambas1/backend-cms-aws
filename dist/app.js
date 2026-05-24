@@ -38,7 +38,6 @@ const cmsOrigins = [
     process.env.CMS_FRONTEND_URL,
     process.env.CMS_FRONTEND_PROD_URL,
     `http://localhost:${PORT}`,
-    // `http://192.168.1.4:3000`,
 ].filter(Boolean);
 const publicOrigins = [
     process.env.PUBLIC_FRONTEND_URL || "http://localhost:3002",
@@ -81,7 +80,6 @@ app.use("/api/cms", cmsCors, industry_1.default);
 app.use("/api/cms", cmsCors, categories_1.default);
 app.use("/api/cms", cmsCors, tags_1.default);
 app.use("/api/cms", cmsCors, articles_1.default);
-// app.use("/api/cms", cmsCors, event);
 app.use("/api/cms", cmsCors, caseStudies_1.default);
 // Public
 app.use("/api/public", (req, res, next) => {
@@ -91,7 +89,6 @@ app.use("/api/public", (req, res, next) => {
 app.use("/api/public", publicCors, categoryPublic_1.default);
 app.use("/api/public", publicCors, tagPublic_1.default);
 app.use("/api/public", publicCors, articlePublic_1.default);
-// app.use("/api/public", publicCors, eventPublic);
 app.use("/api/public", publicCors, caseStudyPublic_1.default);
 // File
 app.use("/uploads", file_1.default);

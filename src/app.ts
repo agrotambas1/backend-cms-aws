@@ -41,7 +41,6 @@ const cmsOrigins = [
   process.env.CMS_FRONTEND_URL,
   process.env.CMS_FRONTEND_PROD_URL,
   `http://localhost:${PORT}`,
-  // `http://192.168.1.4:3000`,
 ].filter(Boolean);
 
 const publicOrigins = [
@@ -91,7 +90,6 @@ app.use("/api/cms", cmsCors, industries);
 app.use("/api/cms", cmsCors, articleCategories);
 app.use("/api/cms", cmsCors, articleTags);
 app.use("/api/cms", cmsCors, article);
-// app.use("/api/cms", cmsCors, event);
 app.use("/api/cms", cmsCors, caseStudies);
 
 // Public
@@ -102,7 +100,6 @@ app.use("/api/public", (req, res, next) => {
 app.use("/api/public", publicCors, articleCategoriesPublic);
 app.use("/api/public", publicCors, articleTagsPublic);
 app.use("/api/public", publicCors, articlePublic);
-// app.use("/api/public", publicCors, eventPublic);
 app.use("/api/public", publicCors, caseStudiesPublic);
 
 // File
