@@ -22,7 +22,12 @@ router.get("/media/:id", getMediaById);
 
 router.get("/media/download/:id", downloadMedia);
 
-router.post("/media", uploadMiddleware, editorsOnly, uploadMedia);
+router.post(
+  "/media",
+  uploadMiddleware.single("file"),
+  editorsOnly,
+  uploadMedia,
+);
 
 router.put("/media/:id", editorsOnly, updateMedia);
 

@@ -13,7 +13,7 @@ router.use(authMiddleware_1.authMiddleware);
 router.get("/media", mediaController_1.getMedia);
 router.get("/media/:id", mediaController_1.getMediaById);
 router.get("/media/download/:id", mediaController_1.downloadMedia);
-router.post("/media", upload_1.uploadMedia, permission_1.editorsOnly, mediaController_1.uploadMedia);
+router.post("/media", upload_1.uploadMedia.single("file"), permission_1.editorsOnly, mediaController_1.uploadMedia);
 router.put("/media/:id", permission_1.editorsOnly, mediaController_1.updateMedia);
 router.delete("/media/:id", permission_1.adminOnly, mediaController_1.deleteMedia);
 router.delete("/media", permission_1.adminOnly, mediaController_1.bulkDeleteMedia);
