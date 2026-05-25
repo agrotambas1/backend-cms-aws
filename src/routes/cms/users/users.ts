@@ -8,6 +8,12 @@ import {
 import { authMiddleware } from "../../../middleware/authMiddleware";
 import { adminOnly } from "../../../middleware/permission";
 import { protectAdminAccount } from "../../../middleware/protectedAdmin";
+import {
+  guardDeleteUser,
+  guardRegisterRole,
+  guardSuperAdminLimit,
+  guardUpdateRole,
+} from "../../../middleware/userGuard";
 
 const router = express.Router();
 
@@ -15,11 +21,17 @@ router.use(authMiddleware);
 
 router.get("/users", adminOnly, getUser);
 
-router.post("/users", adminOnly, registerUser);
+router.post(
+  "/users",
+  adminOnly,
+  guardRegisterRole,
+  guardSuperAdminLimit,
+  registerUser,
+);
 
-router.put("/users/:id", adminOnly, protectAdminAccount, updateUser);
+router.put("/users/:id", adminOnly, guardUpdateRole, updateUser);
 
-router.delete("/users/:id", adminOnly, protectAdminAccount, deleteUser);
+router.delete("/users/:id", adminOnly, guardDeleteUser, deleteUser);
 
 export default router;
 

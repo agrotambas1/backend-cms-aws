@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
 export type UserRole =
+  | "SUPER_ADMIN"
   | "ADMIN"
   | "MARKETING_EDITOR"
   | "TECHNICAL_EDITOR"
@@ -29,24 +30,37 @@ export const checkRole = (...allowedRoles: UserRole[]) => {
   };
 };
 
-// Admin only - Full access
-export const adminOnly = checkRole("ADMIN");
+// Super Admin only
+export const superAdminOnly = checkRole("SUPER_ADMIN");
+
+// Admin only
+export const adminOnly = checkRole("ADMIN", "SUPER_ADMIN");
 
 // All editors (Marketing + Technical) - Can create/edit content
 export const editorsOnly = checkRole(
+  "SUPER_ADMIN",
   "ADMIN",
   "MARKETING_EDITOR",
   "TECHNICAL_EDITOR",
 );
 
 // Marketing Editor - Can create/edit/publish
-export const marketingEditorAccess = checkRole("ADMIN", "MARKETING_EDITOR");
+export const marketingEditorAccess = checkRole(
+  "SUPER_ADMIN",
+  "ADMIN",
+  "MARKETING_EDITOR",
+);
 
 // Technical Editor - Can edit/approve
-export const technicalEditorAccess = checkRole("ADMIN", "TECHNICAL_EDITOR");
+export const technicalEditorAccess = checkRole(
+  "SUPER_ADMIN",
+  "ADMIN",
+  "TECHNICAL_EDITOR",
+);
 
 // All authenticated users (including viewers)
 export const authenticatedOnly = checkRole(
+  "SUPER_ADMIN",
   "ADMIN",
   "MARKETING_EDITOR",
   "TECHNICAL_EDITOR",

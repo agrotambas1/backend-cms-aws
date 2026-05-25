@@ -50,7 +50,18 @@ const prisma = new PrismaClient();
 const users = [
   {
     id: "92f62e79-f492-4c34-9026-bf499c4a08c5",
-    name: "Administrator",
+    name: "Super Administrator",
+    username: "superadmin",
+    email: "superadmin@example.com",
+    password: bcrypt.hashSync("superadmin", 10),
+    role: "SUPER_ADMIN",
+    isActive: true,
+    createdAt: new Date(),
+    deletedAt: null,
+  },
+  {
+    id: "92f62e79-f492-4c34-9026-bf499c4a08c6",
+    name: "Admin",
     username: "admin",
     email: "admin@example.com",
     password: bcrypt.hashSync("admin", 10),

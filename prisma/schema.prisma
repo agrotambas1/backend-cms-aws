@@ -30,9 +30,6 @@ model User {
   createdArticles Article[]  @relation("ArticleCreator")
   updatedArticles Article[]  @relation("ArticleUpdater")
 
-  // createdEvents   Event[] @relation("EventCreator")
-  // updatedEvents   Event[] @relation("EventUpdater")
-
   createdCaseStudies CaseStudy[] @relation("CaseStudyCreator")
   updatedCaseStudies CaseStudy[] @relation("CaseStudyUpdater")
 
@@ -66,16 +63,15 @@ model Media {
 
   createdAt DateTime  @default(now()) @map("created_at")
   deletedAt DateTime? @map("deleted_at")
-
-  // images    Banner[]
+  
   articles  Article[] @relation("ArticleThumbnail")
-
-  // eventThumbnails Event[] @relation("EventThumbnail")  
 
   caseStudyThumbnails CaseStudy[] @relation("CaseStudyThumbnail")  
 
   articlePublications    Article[]   @relation("ArticlePublication")
   caseStudyPublications  CaseStudy[] @relation("CaseStudyPublication")
+  // techPartnerImages TechnologyPartner[] @relation("TechPartnerImage")
+
 
   @@index([createdBy, deletedAt])
   @@index([mimeType, deletedAt])
@@ -96,9 +92,9 @@ model Service {
   createdAt   DateTime  @default(now()) @map("created_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  caseStudies CaseStudy[]
-  // events Event[]
+  caseStudies CaseStudy[]  
   articles Article[]
+  // techPartners PivotTechPartnerService[]
 
   @@unique([slug, deletedAt])
   @@index([isActive, deletedAt])
@@ -120,9 +116,9 @@ model Industry {
   createdAt   DateTime  @default(now()) @map("created_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  caseStudies CaseStudy[]
-  // events Event[]
+  caseStudies CaseStudy[]  
   articles Article[]
+  // techPartners PivotTechPartnerIndustry[]
 
   @@unique([slug, deletedAt])
   @@index([isActive, deletedAt])
@@ -232,58 +228,6 @@ model PivotArticleTag {
   @@map("pivot_article_tags")
 }
 
-// model Event {
-//   id    String  @id @default(uuid()) @db.Uuid
-//   eventName String @map("event_name")
-//   slug  String
-//   excerpt String? @db.Text
-//   description String @db.Text
-
-//   serviceId String? @map("service_id") @db.Uuid
-//   industryId String? @map("industry_id") @db.Uuid
-
-//   thumbnailId   String? @map("thumbnail_id") @db.Uuid
-//   eventType String @map("event_type")
-
-//   eventDate DateTime @map("event_date")
-
-//   location    String?
-//   locationType  String  @map("location_type")
-//   meetingUrl  String?
-
-//   registrationUrl String? @map("registration_url")
-//   quota   Int?
-
-//   status  String  
-
-//   createdBy String  @map("created_by") @db.Uuid
-//   updatedBy String?  @map("updated_by") @db.Uuid
-
-//   createdAt DateTime  @default(now()) @map("created_at")
-//   updatedAt DateTime  @updatedAt  @map("updated_at")
-//   deletedAt DateTime? @map("deleted_at")
-
-//   creator User  @relation("EventCreator", fields: [createdBy], references: [id])
-//   updater User? @relation("EventUpdater", fields: [updatedBy], references: [id])
-
-//   thumbnailMedia  Media?  @relation("EventThumbnail", fields: [thumbnailId], references: [id])  
-
-//   service  Service? @relation(fields: [serviceId], references: [id])
-//   industry   Industry? @relation(fields: [industryId], references: [id])  
-
-//   @@unique([slug, deletedAt])
-
-//   @@index([status, deletedAt])  
-//   @@index([eventDate, deletedAt])  
-//   @@index([eventDate, status, deletedAt])
-//   @@index([locationType, deletedAt])
-//   @@index([status, eventDate, deletedAt])  
-//   @@index([eventType, deletedAt])
-//   @@index([createdAt(sort: Desc)])
-
-//   @@map("events")
-// }
-
 model CaseStudy {
   id  String  @id @default(uuid()) @db.Uuid
   title String
@@ -338,3 +282,48 @@ model CaseStudy {
 
   @@map("case_studies")
 }
+
+// model TechnologyPartner {
+//   id          String    @id @default(uuid()) @db.Uuid
+//   name        String
+//   imageId     String   @map("image_id") @db.Uuid
+//   url         String?
+//   description String?   @db.Text
+//   isActive    Boolean   @default(true) @map("is_active")
+//   createdAt   DateTime  @default(now()) @map("created_at")
+//   deletedAt   DateTime? @map("deleted_at")
+
+//   image       Media    @relation("TechPartnerImage", fields: [imageId], references: [id]) 
+
+//   services    PivotTechPartnerService[]
+//   industries  PivotTechPartnerIndustry[]
+
+//   @@index([isActive, deletedAt])
+//   @@map("technology_partners")
+// }
+
+// model PivotTechPartnerService {
+//   techPartnerId String @map("tech_partner_id") @db.Uuid
+//   serviceId     String @map("service_id") @db.Uuid
+//   createdAt     DateTime @default(now()) @map("created_at")
+
+//   techPartner TechnologyPartner @relation(fields: [techPartnerId], references: [id], onDelete: Cascade)
+//   service     Service           @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+//   @@id([techPartnerId, serviceId])
+//   @@index([serviceId])
+//   @@map("pivot_tech_partner_services")
+// }
+
+// model PivotTechPartnerIndustry {
+//   techPartnerId String @map("tech_partner_id") @db.Uuid
+//   industryId    String @map("industry_id") @db.Uuid
+//   createdAt     DateTime @default(now()) @map("created_at")
+
+//   techPartner TechnologyPartner @relation(fields: [techPartnerId], references: [id], onDelete: Cascade)
+//   industry    Industry          @relation(fields: [industryId], references: [id], onDelete: Cascade)
+
+//   @@id([techPartnerId, industryId])
+//   @@index([industryId])
+//   @@map("pivot_tech_partner_industries")
+// }
