@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authenticatedOnly = exports.technicalEditorAccess = exports.marketingEditorAccess = exports.editorsOnly = exports.adminOnly = exports.checkRole = exports.hasRole = void 0;
+exports.authenticatedOnly = exports.technicalEditorAccess = exports.marketingEditorAccess = exports.editorsOnly = exports.adminOnly = exports.superAdminOnly = exports.checkRole = exports.hasRole = void 0;
 const hasRole = (userRole, allowedRoles) => {
     return allowedRoles.includes(userRole);
 };
@@ -19,14 +19,16 @@ const checkRole = (...allowedRoles) => {
     };
 };
 exports.checkRole = checkRole;
-// Admin only - Full access
-exports.adminOnly = (0, exports.checkRole)("ADMIN");
+// Super Admin only
+exports.superAdminOnly = (0, exports.checkRole)("SUPER_ADMIN");
+// Admin only
+exports.adminOnly = (0, exports.checkRole)("ADMIN", "SUPER_ADMIN");
 // All editors (Marketing + Technical) - Can create/edit content
-exports.editorsOnly = (0, exports.checkRole)("ADMIN", "MARKETING_EDITOR", "TECHNICAL_EDITOR");
+exports.editorsOnly = (0, exports.checkRole)("SUPER_ADMIN", "ADMIN", "MARKETING_EDITOR", "TECHNICAL_EDITOR");
 // Marketing Editor - Can create/edit/publish
-exports.marketingEditorAccess = (0, exports.checkRole)("ADMIN", "MARKETING_EDITOR");
+exports.marketingEditorAccess = (0, exports.checkRole)("SUPER_ADMIN", "ADMIN", "MARKETING_EDITOR");
 // Technical Editor - Can edit/approve
-exports.technicalEditorAccess = (0, exports.checkRole)("ADMIN", "TECHNICAL_EDITOR");
+exports.technicalEditorAccess = (0, exports.checkRole)("SUPER_ADMIN", "ADMIN", "TECHNICAL_EDITOR");
 // All authenticated users (including viewers)
-exports.authenticatedOnly = (0, exports.checkRole)("ADMIN", "MARKETING_EDITOR", "TECHNICAL_EDITOR", "VIEWER");
+exports.authenticatedOnly = (0, exports.checkRole)("SUPER_ADMIN", "ADMIN", "MARKETING_EDITOR", "TECHNICAL_EDITOR", "VIEWER");
 //# sourceMappingURL=permission.js.map

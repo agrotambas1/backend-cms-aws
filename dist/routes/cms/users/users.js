@@ -7,13 +7,13 @@ const express_1 = __importDefault(require("express"));
 const userController_1 = require("../../../controllers/cms/users/userController");
 const authMiddleware_1 = require("../../../middleware/authMiddleware");
 const permission_1 = require("../../../middleware/permission");
-const protectedAdmin_1 = require("../../../middleware/protectedAdmin");
+const userGuard_1 = require("../../../middleware/userGuard");
 const router = express_1.default.Router();
 router.use(authMiddleware_1.authMiddleware);
 router.get("/users", permission_1.adminOnly, userController_1.getUser);
-router.post("/users", permission_1.adminOnly, userController_1.registerUser);
-router.put("/users/:id", permission_1.adminOnly, protectedAdmin_1.protectAdminAccount, userController_1.updateUser);
-router.delete("/users/:id", permission_1.adminOnly, protectedAdmin_1.protectAdminAccount, userController_1.deleteUser);
+router.post("/users", permission_1.adminOnly, userGuard_1.guardRegisterRole, userGuard_1.guardSuperAdminLimit, userController_1.registerUser);
+router.put("/users/:id", permission_1.adminOnly, userGuard_1.guardUpdateRole, userController_1.updateUser);
+router.delete("/users/:id", permission_1.adminOnly, userGuard_1.guardDeleteUser, userController_1.deleteUser);
 exports.default = router;
 /** @swagger
  * /api/cms/users:

@@ -100,3 +100,60 @@ export const me = async (req: Request, res: Response) => {
     role: req.user.role,
   });
 };
+
+export const updateMe = async (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const { name, username, email, password } = req.body;
+
+  try {
+    if (username) {
+      const duplicate = await prisma.user.findFirst({
+        where: { username, id: { not: req.user.id }, deletedAt: null },
+      });
+      if (duplicate) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+    }
+
+    if (email) {
+      const duplicate = await prisma.user.findFirst({
+        where: { email, id: { not: req.user.id }, deletedAt: null },
+      });
+      if (duplicate) {
+        return res.status(400).json({ message: "Email already taken" });
+      }
+    }
+
+    const updateData: Record<string, unknown> = {};
+    if (name) updateData.name = name;
+    if (username) updateData.username = username;
+    if (email) updateData.email = email;
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updateData,
+    });
+
+    return res.json({
+      status: "success",
+      data: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Failed to update profile" });
+  }
+};

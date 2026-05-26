@@ -38,5 +38,6 @@ router.post("/login", authController_1.loginUser);
  */
 router.post("/logout", authController_1.logoutUser);
 router.get("/me", authMiddleware_1.authMiddleware, authController_1.me);
+router.put("/me", authMiddleware_1.authMiddleware, authController_1.updateMe);
 exports.default = router;
 //# sourceMappingURL=auth.js.map

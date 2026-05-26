@@ -70,7 +70,7 @@ model Media {
 
   articlePublications    Article[]   @relation("ArticlePublication")
   caseStudyPublications  CaseStudy[] @relation("CaseStudyPublication")
-  // techPartnerImages TechnologyPartner[] @relation("TechPartnerImage")
+  techPartnerImages TechnologyPartner[] @relation("TechPartnerImage")
 
 
   @@index([createdBy, deletedAt])
@@ -94,7 +94,7 @@ model Service {
 
   caseStudies CaseStudy[]  
   articles Article[]
-  // techPartners PivotTechPartnerService[]
+  techPartners PivotTechPartnerService[]
 
   @@unique([slug, deletedAt])
   @@index([isActive, deletedAt])
@@ -118,7 +118,7 @@ model Industry {
 
   caseStudies CaseStudy[]  
   articles Article[]
-  // techPartners PivotTechPartnerIndustry[]
+  techPartners PivotTechPartnerIndustry[]
 
   @@unique([slug, deletedAt])
   @@index([isActive, deletedAt])
@@ -283,47 +283,47 @@ model CaseStudy {
   @@map("case_studies")
 }
 
-// model TechnologyPartner {
-//   id          String    @id @default(uuid()) @db.Uuid
-//   name        String
-//   imageId     String   @map("image_id") @db.Uuid
-//   url         String?
-//   description String?   @db.Text
-//   isActive    Boolean   @default(true) @map("is_active")
-//   createdAt   DateTime  @default(now()) @map("created_at")
-//   deletedAt   DateTime? @map("deleted_at")
+model TechnologyPartner {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  imageId     String   @map("image_id") @db.Uuid
+  url         String?
+  description String?   @db.Text
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  deletedAt   DateTime? @map("deleted_at")
 
-//   image       Media    @relation("TechPartnerImage", fields: [imageId], references: [id]) 
+  image       Media    @relation("TechPartnerImage", fields: [imageId], references: [id]) 
 
-//   services    PivotTechPartnerService[]
-//   industries  PivotTechPartnerIndustry[]
+  services    PivotTechPartnerService[]
+  industries  PivotTechPartnerIndustry[]
 
-//   @@index([isActive, deletedAt])
-//   @@map("technology_partners")
-// }
+  @@index([isActive, deletedAt])
+  @@map("technology_partners")
+}
 
-// model PivotTechPartnerService {
-//   techPartnerId String @map("tech_partner_id") @db.Uuid
-//   serviceId     String @map("service_id") @db.Uuid
-//   createdAt     DateTime @default(now()) @map("created_at")
+model PivotTechPartnerService {
+  techPartnerId String @map("tech_partner_id") @db.Uuid
+  serviceId     String @map("service_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
 
-//   techPartner TechnologyPartner @relation(fields: [techPartnerId], references: [id], onDelete: Cascade)
-//   service     Service           @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  techPartner TechnologyPartner @relation(fields: [techPartnerId], references: [id], onDelete: Cascade)
+  service     Service           @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
-//   @@id([techPartnerId, serviceId])
-//   @@index([serviceId])
-//   @@map("pivot_tech_partner_services")
-// }
+  @@id([techPartnerId, serviceId])
+  @@index([serviceId])
+  @@map("pivot_tech_partner_services")
+}
 
-// model PivotTechPartnerIndustry {
-//   techPartnerId String @map("tech_partner_id") @db.Uuid
-//   industryId    String @map("industry_id") @db.Uuid
-//   createdAt     DateTime @default(now()) @map("created_at")
+model PivotTechPartnerIndustry {
+  techPartnerId String @map("tech_partner_id") @db.Uuid
+  industryId    String @map("industry_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
 
-//   techPartner TechnologyPartner @relation(fields: [techPartnerId], references: [id], onDelete: Cascade)
-//   industry    Industry          @relation(fields: [industryId], references: [id], onDelete: Cascade)
+  techPartner TechnologyPartner @relation(fields: [techPartnerId], references: [id], onDelete: Cascade)
+  industry    Industry          @relation(fields: [industryId], references: [id], onDelete: Cascade)
 
-//   @@id([techPartnerId, industryId])
-//   @@index([industryId])
-//   @@map("pivot_tech_partner_industries")
-// }
+  @@id([techPartnerId, industryId])
+  @@index([industryId])
+  @@map("pivot_tech_partner_industries")
+}

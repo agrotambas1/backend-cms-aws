@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.me = exports.logoutUser = exports.loginUser = void 0;
+exports.updateMe = exports.me = exports.logoutUser = exports.loginUser = void 0;
 const db_1 = require("../../../config/db");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const generateToken_1 = require("../../../utils/generateToken");
@@ -90,4 +90,58 @@ const me = async (req, res) => {
     });
 };
 exports.me = me;
+const updateMe = async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+    const { name, username, email, password } = req.body;
+    try {
+        if (username) {
+            const duplicate = await db_1.prisma.user.findFirst({
+                where: { username, id: { not: req.user.id }, deletedAt: null },
+            });
+            if (duplicate) {
+                return res.status(400).json({ message: "Username already taken" });
+            }
+        }
+        if (email) {
+            const duplicate = await db_1.prisma.user.findFirst({
+                where: { email, id: { not: req.user.id }, deletedAt: null },
+            });
+            if (duplicate) {
+                return res.status(400).json({ message: "Email already taken" });
+            }
+        }
+        const updateData = {};
+        if (name)
+            updateData.name = name;
+        if (username)
+            updateData.username = username;
+        if (email)
+            updateData.email = email;
+        if (password) {
+            const salt = await bcryptjs_1.default.genSalt(10);
+            updateData.password = await bcryptjs_1.default.hash(password, salt);
+        }
+        const user = await db_1.prisma.user.update({
+            where: { id: req.user.id },
+            data: updateData,
+        });
+        return res.json({
+            status: "success",
+            data: {
+                id: user.id,
+                name: user.name,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            },
+        });
+    }
+    catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).json({ message: "Failed to update profile" });
+    }
+};
+exports.updateMe = updateMe;
 //# sourceMappingURL=authController.js.map

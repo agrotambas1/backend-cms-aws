@@ -92,6 +92,15 @@ exports.articlePublicDetailSelect = {
             height: true,
         },
     },
+    publication: {
+        select: {
+            id: true,
+            fileName: true,
+            filePath: true,
+            altText: true,
+            url: true,
+        },
+    },
     category: {
         select: {
             id: true,

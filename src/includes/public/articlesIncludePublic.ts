@@ -100,6 +100,16 @@ export const articlePublicDetailSelect = {
     },
   },
 
+  publication: {
+    select: {
+      id: true,
+      fileName: true,
+      filePath: true,
+      altText: true,
+      url: true,
+    },
+  },
+
   category: {
     select: {
       id: true,

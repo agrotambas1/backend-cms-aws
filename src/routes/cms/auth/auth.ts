@@ -3,6 +3,7 @@ import {
   loginUser,
   logoutUser,
   me,
+  updateMe,
 } from "../../../controllers/cms/auth/authController";
 import { authMiddleware } from "../../../middleware/authMiddleware";
 
@@ -41,5 +42,7 @@ router.post("/login", loginUser);
 router.post("/logout", logoutUser);
 
 router.get("/me", authMiddleware, me);
+
+router.put("/me", authMiddleware, updateMe);
 
 export default router;
