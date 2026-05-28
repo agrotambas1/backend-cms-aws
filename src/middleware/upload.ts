@@ -69,7 +69,8 @@
 
 import multer from "multer";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { v4 as uuid } from "uuid";
+// import { v4 as uuid } from "uuid";
+import { randomUUID } from "crypto";
 import { Request, Response, NextFunction } from "express";
 import { s3 } from "../config/s3";
 
@@ -112,7 +113,7 @@ const uploadToS3 = (module: string) => {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const ext = req.file.originalname.split(".").pop();
-    const key = `uploads/${module}/${year}/${month}/${uuid()}.${ext}`;
+    const key = `uploads/${module}/${year}/${month}/${randomUUID()}.${ext}`;
 
     try {
       await s3.send(
