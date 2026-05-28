@@ -8,7 +8,7 @@
     "dev": "ts-node-dev --respawn --transpile-only --watch src --no-notify src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "seed:users": "node prisma/seed.ts"
+    "seed:users": "node prisma/seed.ts",
     "vercel-build": "npm install --include=dev && npm run build && npx prisma generate && npx prisma migrate deploy"
   },
   "keywords": [],
